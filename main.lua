@@ -101,4 +101,28 @@ end
 y_hat = model:forward(x)
 print(y_hat)
 gnuplot.plot(x:reshape(20),y_hat:reshape(20))
--- gnuplot.plot(model:forward(x))
+
+------------------------------------------------------------------------------
+-- DRAW REGRESSION
+------------------------------------------------------------------------------
+c = 0
+density = 5.0
+ss = 30
+WIDTH = 700
+
+sum_y = {}
+sum_y_sq = {}
+for i=0, 1000 do
+   sum_y[i] = 0
+   sum_y_sq[i] = 0
+end
+
+for i=0.0,WIDTH do 
+	_x = (i-WIDTH/2)/ss
+	input = torch.Tensor({_x})
+    _y = model:forward(input);
+    sum_y[c] = sum_y[c] + _y[1]
+    sum_y_sq[c] = sum_y_sq[c] + (_y[1]*_y[1])
+	i = i + density
+	c = c + 1
+end
