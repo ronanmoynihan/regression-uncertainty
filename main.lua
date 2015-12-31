@@ -101,6 +101,7 @@ end
 y_hat = model:forward(x)
 print(y_hat)
 gnuplot.plot(x:reshape(20),y_hat:reshape(20))
+gnuplot.figure()
 
 ------------------------------------------------------------------------------
 -- DRAW REGRESSION
@@ -109,6 +110,7 @@ c = 0
 density = 5.0
 ss = 30
 WIDTH = 700
+HEIGHT = 500
 
 sum_y = {}
 sum_y_sq = {}
@@ -117,12 +119,25 @@ for i=0, 1000 do
    sum_y_sq[i] = 0
 end
 
-for i=0.0,WIDTH do 
+final_decision_points = torch.Tensor(141,2)
+
+for i=0.0,WIDTH, density do 
 	_x = (i-WIDTH/2)/ss
 	input = torch.Tensor({_x})
     _y = model:forward(input);
     sum_y[c] = sum_y[c] + _y[1]
     sum_y_sq[c] = sum_y_sq[c] + (_y[1]*_y[1])
-	i = i + density
+
+    print(_y[1])
+--	print(-y*ss+HEIGHT/2)	
+	final_decision_points[c+1][1] = i
+
+	-- JS Version adds a minus to -y[1]. Not sure why?
+	final_decision_points[c+1][2] = _y[1]*ss+HEIGHT/2
+
 	c = c + 1
 end
+
+x_axis = final_decision_points[{{},{1}}]:reshape(final_decision_points:size(1))
+y_axis = final_decision_points[{{},{2}}]:reshape(final_decision_points:size(1))
+gnuplot.plot(x_axis, y_axis)
