@@ -2,7 +2,7 @@ require 'torch'
 require 'nn'
 require 'gnuplot'
 
-ticks = 5
+ticks = 10
 epochs = 50
 iterations_complete = 0
 
@@ -30,7 +30,6 @@ y = torch.Tensor({ {-2.940873316797358},{-2.6477206762556778},{-0.68133094738197
 -- MODEL
 ------------------------------------------------------------------------------
 
--- TODO: Check that model matches js demo.
 local n_inputs = 1
 local HUs = 20
 local n_outputs = 1
@@ -132,8 +131,6 @@ function draw_reg()
 
 	x_axis = final_decision_points[{{},{1}}]:reshape(final_decision_points:size(1))
 	y_axis = final_decision_points[{{},{2}}]:reshape(final_decision_points:size(1))
-	--gnuplot.plot(x_axis, y_axis)
-	--gnuplot.figure()
 
 	------------------------------------------------------------------------------
 	-- 2. Draw the mean plus minus 2 standard deviations
@@ -146,15 +143,12 @@ function draw_reg()
 		
 		mean_plus_minus2_std[c+1][1] = i
 
-		-- JS Version adds a minus to -y[1]. Not sure why?
-		
+		-- JS Version adds a minus to -y[1]. Not sure why?	
 		mean_plus_minus2_std[c+1][2] = mean*ss+HEIGHT/2
 		c = c + 1
 	end	
 	x_axis = mean_plus_minus2_std[{{},{1}}]:reshape(final_decision_points:size(1))
 	y_axis = mean_plus_minus2_std[{{},{2}}]:reshape(final_decision_points:size(1))
-	-- gnuplot.plot(x_axis, y_axis)
-	-- gnuplot.figure()
 
 	------------------------------------------------------------------------------
 	-- 3. Draw the uncertainty
@@ -165,34 +159,20 @@ function draw_reg()
 
     l2 = 0.005
     tau_inv = (2 * x:size(1) * 0.00001) / (1 - 0.05) / l2
-    for u = 1, 4 do
+    for u = 1, 1 do
 
     	c = 0;
     	for i=0.0, WIDTH, density do
     		mean = sum_y[c] / iterations_complete
     		y_sq_avg = sum_y_sq[c] / iterations_complete
-    		std = torch.sqrt(y_sq_avg - mean * mean) + tau_inv
-    		-- print(mean)
-    		print(std)
-    		-- print(std)
-    		-- print(y_sq_avg)
-    		-- print(mean)
-    		-- print(tau_inv)
- 
+    		std = torch.sqrt(y_sq_avg - mean * mean) + tau_inv 
     		mean = mean + 2*std * u/4
 
     		uncertainty1_plus[c+1][1] = i
 
 			-- JS Version adds a minus to -y[1]. Not sure why?
-		
 			uncertainty1_plus[c+1][2] = mean*ss+HEIGHT/2
-
     		c = c+1
-    --     var std = Math.sqrt(sum_y_sq[c].get_average() - mean * mean) + tau_inv;
-    --     mean += 2*std * i/4.;
-    --     if(x===0) {start = -mean*ss+HEIGHT/2; ctx_reg.moveTo(x, start); }
-    --     else ctx_reg.lineTo(x, -mean*ss+HEIGHT/2);
-    --     c += 1;
     	end
     	c = c - 1;
     	for i=WIDTH,0.0, -density do
@@ -204,8 +184,7 @@ function draw_reg()
    
         	uncertainty1_minus[c+1][1] = i
 
-			-- JS Version adds a minus to -y[1]. Not sure why?
-		
+			-- JS Version adds a minus to -y[1]. Not sure why?		
 			uncertainty1_minus[c+1][2] = mean*ss+HEIGHT/2
     		c = c - 1
     	end
@@ -218,53 +197,33 @@ function plot()
 
 	lastFP_x_axis = final_decision_points[{{},{1}}]:reshape(final_decision_points:size(1))
 	lastFP_y_axis = final_decision_points[{{},{2}}]:reshape(final_decision_points:size(1))
-	-- gnuplot.plot(x_axis, y_axis)
-	-- gnuplot.figure()
 
 	x_axis = mean_plus_minus2_std[{{},{1}}]:reshape(final_decision_points:size(1))
 	y_axis = mean_plus_minus2_std[{{},{2}}]:reshape(final_decision_points:size(1))
-	-- gnuplot.plot(x_axis, y_axis)
-	-- gnuplot.figure()
 
-	-- gnuplot.plot(
-	-- 				{'Last forward Pass',lastFP_x_axis, lastFP_y_axis},
-	-- 				{'Average',x_axis,y_axis}
-	-- 			)
-
-	gnuplot.figure()
 	u_x = uncertainty1_plus[{{},{1}}]:reshape(uncertainty1_plus:size(1))
 	yp = uncertainty1_plus[{{},{2}}]:reshape(uncertainty1_plus:size(1))
 	ym = uncertainty1_minus[{{},{2}}]:reshape(uncertainty1_minus:size(1))
 	yy = torch.cat(u_x,ym,2)
 	yy = torch.cat(yy,yp,2)
-	gnuplot.plot({yy,' filledcurves'},
-				 {'Average',x_axis,y_axis},
-				 {'Last forward Pass',lastFP_x_axis, lastFP_y_axis},
-				 {'y plus',u_x,yp,'-'},
-				 {'y minus',u_x,ym,'-'})
-
-
+	gnuplot.plot({'uncertainty',yy,' filledcurves'},
+				 {'Average',x_axis,y_axis,'-'},
+				 {'Last forward Pass',lastFP_x_axis, lastFP_y_axis,'-'},
+				 {u_x,yp,'lines ls 1'},
+				 {u_x,ym,'lines ls 1'})
 
 end
 
-function NPGtick() 
-	update_reg();
-    draw_reg();
+function NPGtick(r) 
+	update_reg()
+    draw_reg()
     plot()
 end
 
 for r=1,ticks do
-	NPGtick()
+	NPGtick(r)
 end
 
-
-
 -- gnuplot.figure()
--- x = torch.linspace(-5,5)
--- y = torch.sin(x)
--- yp = y+0.3+torch.rand(x:size())*0.1
--- ym = y-(torch.rand(x:size())*0.1+0.3)
--- yy = torch.cat(x,ym,2)
--- yy = torch.cat(yy,yp,2)
--- gnuplot.plot({yy,' filledcurves'},{'y plus',x,yp,'-'},{'y minus',x,ym,'-'},{'y',x,y,'-'})
-
+-- gnuplot.plot(x:reshape(20),y:reshape(20),'+')
+-- gnuplot.figure()
