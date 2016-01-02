@@ -2,7 +2,7 @@ require 'torch'
 require 'nn'
 require 'gnuplot'
 
-ticks = 100
+ticks = 2
 epochs = 50
 iterations_complete = 0
 
@@ -159,6 +159,50 @@ function draw_reg()
 	------------------------------------------------------------------------------
 	-- 3. Draw the uncertainty
 	------------------------------------------------------------------------------
+
+	uncertainty1_plus = torch.Tensor(141,2)
+	uncertainty1_minus = torch.Tensor(141,2)
+
+    l2 = 0.005
+    tau_inv = (2 * x:size(1) * 0.00001) / (1 - 0.05) / l2
+    for u = 1, 4 do
+
+    	c = 0;
+    	for i=0.0, WIDTH, density do
+    		mean = sum_y[c] / iterations_complete
+    		y_sq_avg = sum_y_sq[c] / iterations_complete
+    		std = math.sqrt(y_sq_avg - mean * mean) + tau_inv
+    		mean = mean + 2*std * u/4
+
+    		uncertainty1_plus[c+1][1] = i
+
+			-- JS Version adds a minus to -y[1]. Not sure why?
+		
+			uncertainty1_plus[c+1][2] = -mean*ss+HEIGHT/2
+
+    		c = c+1
+    --     var std = Math.sqrt(sum_y_sq[c].get_average() - mean * mean) + tau_inv;
+    --     mean += 2*std * i/4.;
+    --     if(x===0) {start = -mean*ss+HEIGHT/2; ctx_reg.moveTo(x, start); }
+    --     else ctx_reg.lineTo(x, -mean*ss+HEIGHT/2);
+    --     c += 1;
+    	end
+    	c = c - 1;
+    	for i=WIDTH,0.0, -density do
+    		mean = sum_y[c] / iterations_complete
+    		std = math.sqrt(y_sq_avg - mean * mean) + tau_inv
+    		mean = mean - 2*std * u/4
+   
+        	uncertainty1_minus[c+1][1] = i
+
+			-- JS Version adds a minus to -y[1]. Not sure why?
+		
+			uncertainty1_minus[c+1][2] = -mean*ss+HEIGHT/2
+    		c = c - 1
+    	end
+
+    end 
+
 end
 
 function plot()
@@ -189,4 +233,13 @@ end
 for r=1,ticks do
 	NPGtick()
 end
+
+gnuplot.figure()
+x = torch.linspace(-5,5)
+y = torch.sin(x)
+yp = y+0.3+torch.rand(x:size())*0.1
+ym = y-(torch.rand(x:size())*0.1+0.3)
+yy = torch.cat(x,ym,2)
+yy = torch.cat(yy,yp,2)
+gnuplot.plot({yy,' filledcurves'},{'y plus',x,yp,'-'},{'y minus',x,ym,'-'},{'y',x,y,'-'})
 
