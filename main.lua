@@ -2,7 +2,7 @@ require 'torch'
 require 'nn'
 require 'gnuplot'
 
-ticks = 50
+ticks = 100
 epochs = 50
 iterations_complete = 0
 
@@ -132,7 +132,6 @@ function draw_reg()
 	c = 0;
 	for i=0.0,WIDTH, density do 
 		
-		-- TODO: sum_y,iterations_complete should be changed to last 100 passes and always divide by 100 instead.
 		mean = sum_y[c] / iterations_complete
 		
 		mean_plus_minus2_std[c+1][1] = i
@@ -153,12 +152,14 @@ function draw_reg()
 
     l2 = 0.005
     tau_inv = (2 * x:size(1) * 0.00001) / (1 - 0.05) / l2
-    for u = 1, 1 do
+    for u = 1, 4 do
+
+    	-- TODO: Track each 1/2 std so it can be plotted in it's own colour.
+    	--       Currently only the last one will be the points to plot. 
 
     	c = 0;
     	for i=0.0, WIDTH, density do
 
-    		-- TODO: sum_y,iterations_complete should be changed to last 100 passes and always divide by 100 instead.
     		mean = sum_y[c] / iterations_complete
     		y_sq_avg = sum_y_sq[c] / iterations_complete
     		std = torch.sqrt(y_sq_avg - mean * mean) + tau_inv 
@@ -173,7 +174,6 @@ function draw_reg()
     	c = c - 1;
     	for i=WIDTH,0.0, -density do
 
-    		-- TODO: sum_y,iterations_complete should be changed to last 100 passes and always divide by 100 instead.
     		mean = sum_y[c] / iterations_complete
     		y_sq_avg = sum_y_sq[c] / iterations_complete
     		std = math.sqrt(y_sq_avg - mean * mean) + tau_inv
