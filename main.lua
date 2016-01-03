@@ -2,7 +2,7 @@ require 'torch'
 require 'nn'
 require 'gnuplot'
 
-ticks = 10
+ticks = 50
 epochs = 50
 iterations_complete = 0
 
@@ -70,13 +70,6 @@ function update_reg()
 	 	iteration = iteration + 1
 
 	    for i = 1, x:size(1) do
-	 	-- 	 model:zeroGradParameters()
-			-- local output = model:forward(x[i])
-			-- local loss_x = criterion:forward(output,y[i])
-			-- local dl_dy = criterion:backward(output, y[i])
-			-- model:backward(x[i], dl_dy)
-			-- avloss = avloss + loss_x
-			-- print(loss_x)
 
 			dataset = {}
 			function dataset:size() return 1 end 
@@ -84,7 +77,7 @@ function update_reg()
 			trainer:train(dataset)
 		end	
 		avloss = avloss / (x:size(1)*iteration)
-		-- print(avloss)
+
 	end	
 
 	y_hat = model:forward(x)
@@ -139,6 +132,7 @@ function draw_reg()
 	c = 0;
 	for i=0.0,WIDTH, density do 
 		
+		-- TODO: sum_y,iterations_complete should be changed to last 100 passes and always divide by 100 instead.
 		mean = sum_y[c] / iterations_complete
 		
 		mean_plus_minus2_std[c+1][1] = i
@@ -163,6 +157,8 @@ function draw_reg()
 
     	c = 0;
     	for i=0.0, WIDTH, density do
+
+    		-- TODO: sum_y,iterations_complete should be changed to last 100 passes and always divide by 100 instead.
     		mean = sum_y[c] / iterations_complete
     		y_sq_avg = sum_y_sq[c] / iterations_complete
     		std = torch.sqrt(y_sq_avg - mean * mean) + tau_inv 
@@ -177,6 +173,7 @@ function draw_reg()
     	c = c - 1;
     	for i=WIDTH,0.0, -density do
 
+    		-- TODO: sum_y,iterations_complete should be changed to last 100 passes and always divide by 100 instead.
     		mean = sum_y[c] / iterations_complete
     		y_sq_avg = sum_y_sq[c] / iterations_complete
     		std = math.sqrt(y_sq_avg - mean * mean) + tau_inv
