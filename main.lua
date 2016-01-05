@@ -2,11 +2,30 @@ require 'torch'
 require 'nn'
 require 'gnuplot'
 
-ticks = 100
+--[[command line arguments]]--
+cmd = torch.CmdLine()
+cmd:text()
+cmd:text('Trains a Regression model that can be biased to under or over predict.')
+cmd:text('Example:')
+cmd:text('$> th main.lua -std 1 -ticks 10')
+cmd:text('Options:')
+cmd:option('-std', 1, 'how many levels of standard deviations to plot [1-4].')
+cmd:option('-ticks', 10, 'number of times to run 1 full cycle.')
+cmd:text()
+local opt = cmd:parse(arg or {})
+
+ticks = opt.ticks
 epochs = 50
 iterations_complete = 0
 
 torch.manualSeed(4)
+
+sum_y = {}
+sum_y_sq = {}
+for i=0, 1000 do
+	sum_y[i] = 0
+	sum_y_sq[i] = 0
+end
 
 ------------------------------------------------------------------------------
 -- DATA
@@ -33,12 +52,6 @@ y = torch.Tensor({ {-2.940873316797358},{-2.6477206762556778},{-0.68133094738197
 local n_inputs = 1
 local HUs = 20
 local n_outputs = 1
-sum_y = {}
-sum_y_sq = {}
-for i=0, 1000 do
-	sum_y[i] = 0
-	sum_y_sq[i] = 0
-end
 
 model = nn.Sequential()   
 local criterion = nn.MSECriterion()        
@@ -147,8 +160,8 @@ function draw_reg()
 	-- 3. Draw the uncertainty
 	------------------------------------------------------------------------------
 
-	uncertainty1_plus = torch.Tensor(141,2)
-	uncertainty1_minus = torch.Tensor(141,2)
+	uncertainty1_plus = torch.Tensor(4,141,2)
+	uncertainty1_minus = torch.Tensor(4,141,2)
 
     l2 = 0.005
     tau_inv = (2 * x:size(1) * 0.00001) / (1 - 0.05) / l2
@@ -165,10 +178,10 @@ function draw_reg()
     		std = torch.sqrt(y_sq_avg - mean * mean) + tau_inv 
     		mean = mean + 2*std * u/4
 
-    		uncertainty1_plus[c+1][1] = i
+    		uncertainty1_plus[u][c+1][1] = i
 
 			-- JS Version adds a minus to -y[1]. Not sure why?
-			uncertainty1_plus[c+1][2] = mean*ss+HEIGHT/2
+			uncertainty1_plus[u][c+1][2] = mean*ss+HEIGHT/2
     		c = c+1
     	end
     	c = c - 1;
@@ -179,10 +192,10 @@ function draw_reg()
     		std = math.sqrt(y_sq_avg - mean * mean) + tau_inv
     		mean = mean - 2*std * u/4
    
-        	uncertainty1_minus[c+1][1] = i
+        	uncertainty1_minus[u][c+1][1] = i
 
 			-- JS Version adds a minus to -y[1]. Not sure why?		
-			uncertainty1_minus[c+1][2] = mean*ss+HEIGHT/2
+			uncertainty1_minus[u][c+1][2] = mean*ss+HEIGHT/2
     		c = c - 1
     	end
 
@@ -192,17 +205,21 @@ end
 
 function plot()
 
+	std_level = opt.std
+
 	lastFP_x_axis = final_decision_points[{{},{1}}]:reshape(final_decision_points:size(1))
 	lastFP_y_axis = final_decision_points[{{},{2}}]:reshape(final_decision_points:size(1))
 
 	x_axis = mean_plus_minus2_std[{{},{1}}]:reshape(final_decision_points:size(1))
 	y_axis = mean_plus_minus2_std[{{},{2}}]:reshape(final_decision_points:size(1))
 
-	u_x = uncertainty1_plus[{{},{1}}]:reshape(uncertainty1_plus:size(1))
-	yp = uncertainty1_plus[{{},{2}}]:reshape(uncertainty1_plus:size(1))
-	ym = uncertainty1_minus[{{},{2}}]:reshape(uncertainty1_minus:size(1))
+	u_x = uncertainty1_plus[{{std_level},{},{1}}]:reshape(uncertainty1_plus:size(2))
+	yp = uncertainty1_plus[{{std_level},{},{2}}]:reshape(uncertainty1_plus:size(2))
+	ym = uncertainty1_minus[{{std_level},{},{2}}]:reshape(uncertainty1_minus:size(2))
+
 	yy = torch.cat(u_x,ym,2)
 	yy = torch.cat(yy,yp,2)
+
 	gnuplot.plot({'uncertainty',yy,' filledcurves'},
 				 {'Average',x_axis,y_axis,'-'},
 				 {'Last forward Pass',lastFP_x_axis, lastFP_y_axis,'-'},
