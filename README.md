@@ -4,7 +4,7 @@
 ### Plots
 
 #### 2 Iterations
-![](http://a3.mzstatic.com/eu/r30/Purple/v4/ab/39/01/ab390186-20dd-063c-1b37-47e5448e4b88/screen480x480.jpeg?raw=true "Optional Title")
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/ticks2.png?token=ABo7hwfOZp6_dt52H8HgXqEf18_1fwduks5Wlpo7wA%3D%3D "Optional Title")
 
 #### 50 Iterations
-![](http://a3.mzstatic.com/eu/r30/Purple/v4/ab/39/01/ab390186-20dd-063c-1b37-47e5448e4b88/screen480x480.jpeg?raw=true "Optional Title")
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/ticks50.png?token=ABo7h1wRLLBl-RUjz_c0HDyqNRIwEEuJks5WlpqEwA%3D%3D "Optional Title")
