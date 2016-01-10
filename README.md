@@ -1,5 +1,5 @@
 ## Regression Uncertainty
-Torch version of the Javascript [demo](https://github.com/yaringal/DropoutUncertaintyDemos) for Representing Model Uncertainty in Deep Learning as explained in this blog [post](http://mlg.eng.cam.ac.uk/yarin/blog_3d801aa532c1ce.html) 
+Torch version of the Javascript [demo](https://github.com/yaringal/DropoutUncertaintyDemos) for Representing Model Uncertainty in Deep Learning as explained in this blog [post](http://mlg.eng.cam.ac.uk/yarin/blog_3d801aa532c1ce.html). 
 
 ### Dependencies
 
@@ -16,12 +16,15 @@ The code takes in two arguments as follows,
 
 ```lua
  th -i main.lua -std 2 -ticks 50
-`` 
+``` 
 
 ### Plots
 
 #### 2 Iterations
-![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/ticks2.png?token=ABo7hwfOZp6_dt52H8HgXqEf18_1fwduks5Wlpo7wA%3D%3D "Optional Title")
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/2_iterations.png?token=ABo7h0QvHT-uYLyT59cWKz1NB6nlXF1Kks5Wm7JNwA%3D%3D "Optional Title")
 
 #### 50 Iterations
-![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/ticks50.png?token=ABo7h1wRLLBl-RUjz_c0HDyqNRIwEEuJks5WlpqEwA%3D%3D "Optional Title")
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/50_iterations.png?token=ABo7h4q9ITnpFfKii0aPIVfvEZYA_GEwks5Wm7JiwA%3D%3D "Optional Title")
+
+#### Training Data
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/training_data.png?token=ABo7h8BAbzxPNpBeF8GWg0XM724ky8bPks5Wm7KSwA%3D%3D)
