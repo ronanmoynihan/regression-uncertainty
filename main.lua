@@ -66,6 +66,7 @@ model:add(nn.Dropout(0.05))
 model:add(nn.Linear(n_inputs, HUs)) 
 model:add(nn.ReLU())
 model:add(nn.Dropout(0.05))
+model:add(nn.Linear(HUs, HUs)) 
 model:add(nn.Sigmoid())
 model:add(nn.Linear(HUs, n_outputs))
 
