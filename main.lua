@@ -121,6 +121,13 @@ function draw_reg()
 		_x = (i-WIDTH/2)/ss
 		input = torch.Tensor({_x})
 	    _y = model:forward(input)
+	    print('--------')
+	    print('1 st pass')
+	    print(_y)
+	    print('--------')
+	    print('2nd pass')
+	    print(model:forward(input))
+
 	    sum_y[c] = sum_y[c] + _y[1]
 	    sum_y_sq[c] = sum_y_sq[c] + (_y[1]*_y[1])
 		
