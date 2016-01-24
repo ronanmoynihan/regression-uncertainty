@@ -1,6 +1,6 @@
 require 'nn'
 
-function create_model(input_dim,criterion)
+function create_model(input_dim,p)
 
   	------------------------------------------------------------------------------
    	-- MODEL
@@ -13,13 +13,13 @@ function create_model(input_dim,criterion)
     model = nn.Sequential()   
     local criterion = nn.MSECriterion()        
 
-    model:add(nn.Dropout(0.05))
+    model:add(nn.Dropout(p))
     model:add(nn.Linear(n_inputs, 13)) 
     model:add(nn.ReLU())
-    model:add(nn.Dropout(0.05))
-    model:add(nn.Linear(13, 8)) 
+    model:add(nn.Dropout(p))
+    model:add(nn.Linear(13, 9)) 
     model:add(nn.Sigmoid())
-    model:add(nn.Linear(8, n_outputs))
+    model:add(nn.Linear(9, n_outputs))
 
     return model
 end

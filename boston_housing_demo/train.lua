@@ -4,14 +4,14 @@ require 'optim'
 require 'math'
 local create_model = require 'create_model'
 
-local function train(opt,optimMethod,optimState,data,criterion)
+local function train(opt,optimMethod,optimState,data,criterion,p)
 
 	------------------------------------------------------------------------
 	-- create model and loss/grad evaluation function
 	--
 	local ninputs = data.train_data:size(2)
 	local n_train_data = data.train_data:size(1) -- number of training data
-	local model = create_model(ninputs)
+	local model = create_model(ninputs,p)
 
 	local x, dl_dx = model:getParameters()
 
