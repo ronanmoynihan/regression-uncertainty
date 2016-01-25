@@ -65,11 +65,6 @@ local criterion = nn.MSECriterion()
 -- Train.
 local model, training_losses, test_losses = train(opt,optimMethod,optimState, data, criterion, p)
 
--- Test.
-test(data,model) 
--- test(data,model) 
--- test(data,model) 
-
 -- probs = []
 -- for _ in xrange(T):
 --     probs += [model.output_probs(input_x)]
@@ -78,28 +73,34 @@ test(data,model)
 -- tau = l**2 * (1 - model.p) / (2 * N * model.weight_decay)
 -- predictive_variance += tau**-1
 
-l = 0.005
-weight_decay = 0.001
+-- this is anew hyperparamater for uncertaincty.
+-- First, define a prior length-scale ll. This captures our belief over the function frequency. 
+-- A short length-scale ll corresponds to high frequency data, 
+-- and a long length-scale corresponds to low frequency data. 
+l = 0.85
+
+-- this comes from the model settings above.
+weight_decay = 7.76e-04
 
 outputs = torch.zeros(data.test_data:size(1),10)
--- outputs = {}
+
 y_hat = 0
 for n=1,data.test_data:size(1) do
 	for i=1,10 do
-		--outputs[n] = outputs[n] + 0 + model:forward(data.test_data[n])[1]
 		outputs[n][i] = model:forward(data.test_data[n])[1]
 	end
 end
 
--- 
-predictive_mean = outputs:mean(2):expand(data.test_data:size(1), 10)
-m = outputs - outputs:mean(2):expand(data.test_data:size(1), 10)
+predictive_mean = outputs:mean(2)
+diff = outputs - outputs:mean(2):expand(data.test_data:size(1), 10)
 
--- outputs = torch.Tensor{1,2,3}
+predictive_variance = torch.mean(torch.pow(torch.abs(diff),2),2)
 
--- predictive_mean = outputs:mean()
--- predictive_variance = torch.mean(torch.pow(torch.abs(outputs - outputs:mean()),2))
--- tau = torch.pow(l,2) * (1 - p) / (2 * data.train_data:size(1) * weight_decay)
--- print(predictive_variance)
--- predictive_variance = predictive_variance + tau
--- print(predictive_variance)
+-- tau = l**2 * (1 - model.p) / (2 * N * model.weight_decay)
+tau = torch.pow(l,2) * (1 - p) / (2 * data.train_data:size(1) * weight_decay)
+predictive_variance_tau = predictive_variance + torch.pow(tau,-1)
+
+print('\n#   prediction     actual      +/-')
+for i = 1,20 do
+	print(string.format("%2d    %6.2f      %6.2f     %6.2f", i,  predictive_mean[i][1],data.test_targets[i][1],predictive_variance_tau[i][1]))
+end
