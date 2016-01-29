@@ -49,12 +49,12 @@ optimState = {
   learningRateDecay = 7.76e-04
 
 }
-opt.batch_size = 50
+opt.batch_size = 100
 opt.epochs = 6000
 optimMethod = optim.sgd
 
 
-local data_train_percentage = 70 
+local data_train_percentage = 90 
 data = data_loader.load_data(data_file, data_train_percentage)
 print(string.format('\n Training data rows: %d , features: %d', data.train_data:size(1),data.train_data:size(2)) )
 print(string.format('\n Test data rows: %d , features: %d \n', data.test_data:size(1),data.test_data:size(2) ))
@@ -62,8 +62,14 @@ print(string.format('\n Test data rows: %d , features: %d \n', data.test_data:si
 -- Use regular MSE as default criterion.
 local criterion = nn.MSECriterion()
 
+local model = create_model(ninputs,p)
+
+-- reset weights
+local method = 'heuristic'
+local model = require('weight-init')(model, method)
+
 -- Train.
-local model, training_losses, test_losses = train(opt,optimMethod,optimState, data, criterion, p)
+local model, training_losses, test_losses = train(model,opt,optimMethod,optimState, data, criterion, p)
 
 -- probs = []
 -- for _ in xrange(T):
@@ -77,7 +83,8 @@ local model, training_losses, test_losses = train(opt,optimMethod,optimState, da
 -- First, define a prior length-scale ll. This captures our belief over the function frequency. 
 -- A short length-scale ll corresponds to high frequency data, 
 -- and a long length-scale corresponds to low frequency data. 
-l = 0.85
+
+l = .45
 
 -- this comes from the model settings above.
 weight_decay = 7.76e-04
@@ -96,11 +103,18 @@ diff = outputs - outputs:mean(2):expand(data.test_data:size(1), 10)
 
 predictive_variance = torch.mean(torch.pow(torch.abs(diff),2),2)
 
+-- Yarin - think he got tau = 2.695098 from using Bayesian Optim.
+-- tau is currently 1.1835466538529.
+
 -- tau = l**2 * (1 - model.p) / (2 * N * model.weight_decay)
 tau = torch.pow(l,2) * (1 - p) / (2 * data.train_data:size(1) * weight_decay)
+tau = 2.695098
 predictive_variance_tau = predictive_variance + torch.pow(tau,-1)
+
+
+final_test_outputs = model:forward(data.test_data)
 
 print('\n#   prediction     actual      +/-')
 for i = 1,20 do
-	print(string.format("%2d    %6.2f      %6.2f     %6.2f", i,  predictive_mean[i][1],data.test_targets[i][1],predictive_variance_tau[i][1]))
+	print(string.format("%2d    %6.2f      %6.2f     %6.2f", i,  final_test_outputs[i][1],data.test_targets[i][1],predictive_variance_tau[i][1]))
 end

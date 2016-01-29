@@ -14,12 +14,12 @@ function create_model(input_dim,p)
     local criterion = nn.MSECriterion()        
 
     model:add(nn.Dropout(p))
-    model:add(nn.Linear(n_inputs, 13)) 
+    model:add(nn.Linear(n_inputs, 50)) 
     model:add(nn.ReLU())
     model:add(nn.Dropout(p))
-    model:add(nn.Linear(13, 9)) 
+    model:add(nn.Linear(50, 50)) 
     model:add(nn.Sigmoid())
-    model:add(nn.Linear(9, n_outputs))
+    model:add(nn.Linear(50, n_outputs))
 
     return model
 end
