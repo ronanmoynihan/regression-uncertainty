@@ -11,10 +11,9 @@ cmd = torch.CmdLine()
 cmd:text()
 cmd:text('Model uncertainty - Boston Housing Dataset.')
 cmd:text('Example:')
-cmd:text('$> th main.lua -')
+cmd:text('$> th -i main.lua')
 cmd:text('Options:')
--- cmd:option('-under', false, 'train model to under predict')
--- cmd:option('-over', false, 'train model to over predict')
+
 cmd:text()
 local opt = cmd:parse(arg or {})
 local criterion_opt = {}
@@ -22,9 +21,11 @@ local criterion_opt = {}
 -- The Boston.csv file has been converted to torch.
 local data_file = 'data/Boston.th'
 
-torch.manualSeed(4)
+torch.manualSeed(6)
 
-p = 0.1
+opt.p = 0.1
+opt.learningRate = 7.14e-03
+opt.learningRateDecay = 7.76e-04
 
 opt.model_name = 'model'
 opt.optimization = 'sgd'
@@ -33,20 +34,12 @@ opt.test_model_iteration = 15000 -- how often to print the training & test loss.
 
 -- NOTE: the code below changes the optimization algorithm used, and its settings
 local optimState       -- stores a lua table with the optimization algorithm's settings, and state during iterations
-local optimMethod      -- stores a function corresponding to the optimization routine
-
--- |   Hyperparameter   | Best Seen | Previous |
--- ---------------------------------------------	
--- |         x1         | 7.14e-03  | 5.15e-01 |	
--- |         x2         | 8.87e-01  | 4.35e-02 |	
--- |         x3         | 7.76e-04  | 5.10e-02 |	
--- |         x4         | 5.11e-02  | 2.08e-01 |	
--- |         x5         | 7.22e-01  | 6.71e-01 |	
+local optimMethod      -- stores a function corresponding to the optimization routine	
 
 optimState = {
-  learningRate = 7.14e-03 ,
+  learningRate = opt.learningRate,
   --momentum = 8.87e-01,
-  learningRateDecay = 7.76e-04
+  learningRateDecay = opt.learningRateDecay
 
 }
 opt.batch_size = 100
@@ -59,35 +52,22 @@ data = data_loader.load_data(data_file, data_train_percentage)
 print(string.format('\n Training data rows: %d , features: %d', data.train_data:size(1),data.train_data:size(2)) )
 print(string.format('\n Test data rows: %d , features: %d \n', data.test_data:size(1),data.test_data:size(2) ))
 
--- Use regular MSE as default criterion.
-local criterion = nn.MSECriterion()
 
-local model = create_model(ninputs,p)
+local criterion = nn.MSECriterion()
+local model = create_model(ninputs,opt.p)
 
 -- reset weights
-local method = 'heuristic'
+local method = 'uncertainty'
 local model = require('weight-init')(model, method)
 
 -- Train.
-local model, training_losses, test_losses = train(model,opt,optimMethod,optimState, data, criterion, p)
-
--- probs = []
--- for _ in xrange(T):
---     probs += [model.output_probs(input_x)]
--- predictive_mean = numpy.mean(prob, axis=0)
--- predictive_variance = numpy.var(prob, axis=0)
--- tau = l**2 * (1 - model.p) / (2 * N * model.weight_decay)
--- predictive_variance += tau**-1
+local model, training_losses, test_losses = train(model,opt,optimMethod,optimState, data, criterion)
 
 -- this is anew hyperparamater for uncertaincty.
 -- First, define a prior length-scale ll. This captures our belief over the function frequency. 
 -- A short length-scale ll corresponds to high frequency data, 
 -- and a long length-scale corresponds to low frequency data. 
-
-l = .45
-
--- this comes from the model settings above.
-weight_decay = 7.76e-04
+l = 1.45
 
 outputs = torch.zeros(data.test_data:size(1),10)
 
@@ -102,19 +82,15 @@ predictive_mean = outputs:mean(2)
 diff = outputs - outputs:mean(2):expand(data.test_data:size(1), 10)
 
 predictive_variance = torch.mean(torch.pow(torch.abs(diff),2),2)
-
--- Yarin - think he got tau = 2.695098 from using Bayesian Optim.
--- tau is currently 1.1835466538529.
-
--- tau = l**2 * (1 - model.p) / (2 * N * model.weight_decay)
-tau = torch.pow(l,2) * (1 - p) / (2 * data.train_data:size(1) * weight_decay)
-tau = 2.695098
+tau = torch.pow(l,2) * (1 - opt.p) / (2 * data.train_data:size(1) * opt.learningRateDecay)
 predictive_variance_tau = predictive_variance + torch.pow(tau,-1)
 
 
 final_test_outputs = model:forward(data.test_data)
+pred_prob = torch.cdiv((final_test_outputs - predictive_variance), final_test_outputs)
+var_perc = torch.cdiv(predictive_variance,final_test_outputs)
 
-print('\n#   prediction     actual      +/-')
+print('\n#   prediction     actual      +/-        var %      % certainty')
 for i = 1,20 do
-	print(string.format("%2d    %6.2f      %6.2f     %6.2f", i,  final_test_outputs[i][1],data.test_targets[i][1],predictive_variance_tau[i][1]))
+	print(string.format("%2d    %6.2f      %6.2f     %6.2f     %6.2f     %6.2f", i,  final_test_outputs[i][1],data.test_targets[i][1],predictive_variance_tau[i][1],var_perc[i][1],pred_prob[i][1]))
 end

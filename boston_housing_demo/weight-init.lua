@@ -6,10 +6,15 @@
 require("nn")
 
 
+local function w_init_uncertainty(fan_in, fan_out)
+   return math.sqrt(3/fan_in)
+end
+
+
 -- "Efficient backprop"
 -- Yann Lecun, 1998
 local function w_init_heuristic(fan_in, fan_out)
-   return math.sqrt(3/fan_in)
+   return math.sqrt(1/(3*fan_in))
 end
 
 
@@ -41,6 +46,7 @@ local function w_init(net, arg)
    elseif arg == 'xavier'       then method = w_init_xavier
    elseif arg == 'xavier_caffe' then method = w_init_xavier_caffe
    elseif arg == 'kaiming'      then method = w_init_kaiming
+   elseif arg == 'uncertainty'  then method = w_init_uncertainty   
    else
       assert(false)
    end

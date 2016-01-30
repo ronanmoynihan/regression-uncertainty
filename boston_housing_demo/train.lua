@@ -4,7 +4,7 @@ require 'optim'
 require 'math'
 local create_model = require 'create_model'
 
-local function train(model,opt,optimMethod,optimState,data,criterion,p)
+local function train(model,opt,optimMethod,optimState,data,criterion)
 
 	------------------------------------------------------------------------
 	-- create model and loss/grad evaluation function
