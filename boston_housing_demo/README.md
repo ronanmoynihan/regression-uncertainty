@@ -1,6 +1,20 @@
 ## Regression Uncertainty - Boston Housing Dataset
 Test MSE: 12.66 (RMSE: 3.55)  
 
+### Model
+
+Two Hidden layers with 50 units.  
+
+```
+    model:add(nn.Dropout(p))
+    model:add(nn.Linear(n_inputs, HUs)) 
+    model:add(nn.ReLU())
+    model:add(nn.Dropout(p))
+    model:add(nn.Linear(HUs, HUs)) 
+    model:add(nn.Sigmoid())
+    model:add(nn.Linear(HUs, n_outputs))
+```
+
 ### Test Output
 
 % Certainty tells you how much confidence you can have in the prediction.
