@@ -15,6 +15,12 @@ Two hidden layers with 50 units.
     model:add(nn.Linear(HUs, n_outputs))
 ```
 
+### Running
+
+```lua
+ th main.lua
+``` 
+
 ### Test Output
 
 % Certainty tells you how much confidence you can have in the prediction.
