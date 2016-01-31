@@ -3,7 +3,7 @@ Test MSE: 12.66 (RMSE: 3.55)
 
 ### Model
 
-Two Hidden layers with 50 units.  
+Two hidden layers with 50 units.  
 
 ```
     model:add(nn.Dropout(p))
