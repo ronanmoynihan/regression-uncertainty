@@ -21,10 +21,10 @@ The code takes in two arguments as follows,
 ### Plots
 
 #### 2 Iterations
-![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/2_iterations.png?token=ABo7h0QvHT-uYLyT59cWKz1NB6nlXF1Kks5Wm7JNwA%3D%3D "Optional Title")
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/basic%20demo/plots/2_iterations.png "Optional Title")
 
 #### 50 Iterations
-![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/50_iterations.png?token=ABo7h4q9ITnpFfKii0aPIVfvEZYA_GEwks5Wm7JiwA%3D%3D "Optional Title")
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/basic%20demo/plots/50_iterations.png "Optional Title")
 
 #### Training Data
-![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/plots/training_data.png?token=ABo7h8BAbzxPNpBeF8GWg0XM724ky8bPks5Wm7KSwA%3D%3D)
+![](https://raw.githubusercontent.com/ronanmoynihan/regression-uncertainty/master/basic%20demo/plots/training_data.png)

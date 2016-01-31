@@ -7,6 +7,6 @@ Torch version of the Javascript [demo](https://github.com/yaringal/DropoutUncert
 - [gnuplot](https://github.com/torch/gnuplot)  
 
 ### Demos
--- Basic demo using 1 dimensional data
+-- Basic demo using 1 dimensional data  
 -- Boston Housing Dataset demo (13 dimensions)
 
