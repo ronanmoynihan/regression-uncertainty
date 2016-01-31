@@ -108,6 +108,8 @@ pred_prob = torch.cdiv((final_test_outputs - predictive_variance), final_test_ou
 -- variance as a percentage of the prediction
 var_perc = torch.cdiv(predictive_variance,final_test_outputs)
 
+-- TODO: For +/- adjust this value for each prediction based on the final prediction and the mean.
+--       i.e +/- 3.5 could be +0.5/-3.0
 print('\n#   prediction     actual      +/-        var %      % certainty')
 for i = 1,20 do
 	print(string.format("%2d    %6.2f      %6.2f     %6.2f     %6.2f     %6.2f",
