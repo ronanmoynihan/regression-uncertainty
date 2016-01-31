@@ -3,6 +3,9 @@
 --
 -- > model = require('weight-init')(model, 'heuristic')
 --
+-- Copied from elab's torch toolbox
+-- https://github.com/e-lab/torch-toolbox/tree/master/Weight-init
+--
 require("nn")
 
 
